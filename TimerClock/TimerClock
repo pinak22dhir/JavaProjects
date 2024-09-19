@@ -1,0 +1,10 @@
+package Timer;
+
+
+public class Timerclock {
+    public static void main(String[] args)
+    {
+        System.out.println("testing... ");
+        MyWindow obj=new MyWindow();
+    }
+}
