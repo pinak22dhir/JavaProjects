@@ -1,0 +1,167 @@
+package chatapplication;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+
+public class client extends JFrame{
+    Socket socket;
+    PrintWriter outi;
+    BufferedReader br;
+    private JLabel heading=new JLabel("Client Area");
+    private JTextArea messageArea=new JTextArea();
+    private JTextField messageInput=new JTextField();
+    private Font font=new Font("Roboto",Font.PLAIN,20);
+
+    public client()
+    {
+        try{
+            System.out.println("sending request");
+            socket=new Socket("127.0.0.1",1110);
+            System.out.println("connection done");
+            br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            outi=new PrintWriter(socket.getOutputStream());
+            createGUI();
+            handleevents();
+            startReading();
+//            startWriting();
+        }
+        catch(Exception e){
+             e.printStackTrace();
+        }
+    }
+    public void handleevents(){
+        //listener is aobject
+//        messageInput.addKeyListener(new KeyListener(){
+
+        messageInput.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // Implementation for keyTyped event
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // Implementation for keyPressed event
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Implementation for keyReleased event
+            System.out.println("key Released "+e.getKeyCode());
+            if(e.getKeyCode()==10){
+
+                SwingUtilities.invokeLater(() -> {
+                    // Handle key released event on the EDT
+//                    System.out.println("You have pressed the Enter key");
+                    String contentToSend = messageInput.getText();
+                    messageArea.append("Me: " + contentToSend + "\n");
+                    if (outi != null) {
+                        outi.println(contentToSend);
+                        // No need to call flush() explicitly if auto-flush is enabled
+                        outi.flush();
+                        messageInput.setText("");
+
+                        // Clear the text field
+                    } else {
+                        System.err.println("PrintWriter is not initialized.");
+                    } // Clear the text field
+
+                });
+
+            }
+            }
+        });
+    }
+    private void createGUI()
+    {
+        this.setTitle("Client Message");
+        this.setSize(600,700);
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //coding foe component
+        ImageIcon icon = new ImageIcon("path/to/chatapplication/hllo.jpg");
+        if (icon.getImageLoadStatus() != MediaTracker.COMPLETE) {
+            System.err.println("Image failed to load.");
+        } else {
+            heading.setIcon(icon);
+        }
+
+        heading.setHorizontalTextPosition(SwingConstants.CENTER);
+//        heading.setVericalTextPosition(SwingConstants.BOTTOM);
+        heading.setHorizontalAlignment(SwingConstants.CENTER);
+        heading.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        heading.setFont(font);
+
+        messageArea.setFont(font);
+        messageInput.setFont(font);
+        messageInput.setHorizontalAlignment(SwingConstants.CENTER);
+        this.setLayout(new BorderLayout());
+        messageArea.setEditable(false);
+        this.add(heading,BorderLayout.NORTH);
+        JScrollPane jscrool=new JScrollPane(messageArea);
+        jscrool.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        jscrool.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.add(messageArea,BorderLayout.CENTER);
+        this.add(messageInput,BorderLayout.SOUTH);
+        this.setVisible(true);
+
+
+    }
+    public void startReading()
+    {
+        Runnable r1=()-> {
+            System.out.println("Client is reading");
+            try {
+                while (true) {
+                    String msg = br.readLine();
+                    if (msg.equals("exit")) {
+                        System.out.println("server is terminated");
+                        JOptionPane.showMessageDialog(this,"Server terminated the chat" );
+                        messageInput.setEnabled(false);
+                        socket.close();
+                        break;
+                    }
+//                    System.out.println("Server: " + msg);
+                    messageArea.append("Server: "+msg+"\n");
+                }
+            }catch (Exception e) {
+                  System.out.println("SERVER DOES NOT SEND ANYTHING");
+                }
+        };
+        new Thread(r1).start();
+    }
+    public void startWriting()
+    {
+      Runnable r2=()->{
+          System.out.println("writer Started... ");
+          try {
+
+              while (!socket.isClosed()) {
+                  BufferedReader br1 = new BufferedReader(new InputStreamReader(System.in));
+                  String content = br1.readLine();
+//                  out.println(content);
+//                  out.flush();
+                  if(content.equals("exit")){
+                      socket.close();
+                  }
+              }
+          }
+              catch(Exception e) {
+                 System.out.println("server ended in write");
+              }
+    };
+      new Thread(r2).start();
+    }
+
+    public static void main(String[] args)
+    { System.out.println("this is client...");
+       client ci=new client();
+
+    }
+
+}
