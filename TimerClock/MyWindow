@@ -1,0 +1,80 @@
+package Timer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class MyWindow extends JFrame {
+    private JLabel heading;
+    private JLabel clockTable;
+    private Font font=new Font("",Font.BOLD,30);
+
+    MyWindow(){
+        //java swing-->provide set of light weight gui
+        //container that hold and organise other components jframe,jpanel,jbutton
+        //can use this or super --> to change this method->to cuurently define that method instance of this class (object)
+        super.setTitle("My Clock");
+        super.setSize(400,500);
+        super.setLocation(300,50);
+        this.createGUI();
+        this.startClock();
+        super.setVisible(true);
+    }
+    //jframe is a container
+    public void  createGUI()
+    {
+        heading=new JLabel("My clock");
+        clockTable=new JLabel("clock");
+        heading.setFont(font);
+        //guil label
+        clockTable.setFont(font);
+        this.setLayout(new GridLayout(2,1));
+        this.add(heading);
+        this.add(clockTable);
+    }
+    public void startClock()
+    {
+
+//        Timer time = new Timer(1000, new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                // Get the current date and time
+////                String date = new Date().toLocaleString();
+////                // Print the date to the console (or update a UI component)
+////                System.out.println(date);
+////
+////                SimpleDateFormat st=new  SimpleDateFormat ("hh:mm:ss:a");
+////                clockTable.setText(date);
+//            }
+//        });
+
+        // Start the timer
+        Thread t=new Thread(){
+            @Override
+            public void run(){
+                try{
+                    while(true)
+                    {
+                        Date date = new Date();
+                        // Print the date to the console (or update a UI component)
+                        System.out.println(date);
+
+                        SimpleDateFormat st=new  SimpleDateFormat ("dd-mm-yy hh:mm:ss:a");
+                        String sti=st.format(date);
+                        clockTable.setText(sti);
+//                        Thread.sleep(1000);
+                        Thread.currentThread().sleep(1000);
+                    }
+                }
+
+                catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        };
+        t.start();
+
+    }
+
+}
